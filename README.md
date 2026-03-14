@@ -216,21 +216,35 @@ See the [Configuration Reference](docs/configuration.md) for detailed documentat
 
 ### Customization
 
-Claude Code Mastery is designed to be customized. See the [Customization Guide](docs/customization.md) for:
+Claude Code Mastery is designed to be customized. See the [Customization Guide](docs/customization.md) for details.
 
-- Adding your own skills
-- Modifying hook behavior
-- Changing permissions
-- Adding new plugin marketplaces
-- Configuring language preferences
+**Installer flags:**
+
+```bash
+./install.sh --interactive          # Guided setup with prompts
+./install.sh --lang=pt-BR           # Hook messages in Portuguese
+./install.sh --preset=node          # Extra permissions for Node.js
+./install.sh --skip-plugins         # Skip marketplace installation
+./install.sh --plugins=superpowers  # Install only selected marketplaces
+```
+
+**Post-install customization:**
+
+- `scripts/apply-language.sh pt-BR` — Change hook language
+- `scripts/apply-preset.sh python` — Apply project preset
+- Add your own skills to `~/.claude/skills/`
+- Modify hooks in `~/.claude/settings.json`
 
 ---
 
 ## Uninstalling
 
 ```bash
-# From the repository directory
+# macOS/Linux
 ./uninstall.sh
+
+# Windows (PowerShell)
+.\uninstall.ps1
 ```
 
 The uninstaller:
@@ -259,7 +273,7 @@ See the [Troubleshooting Guide](docs/troubleshooting.md) for common issues.
 
 ## Roadmap
 
-### v1.0.0 — Initial Release (Current)
+### v1.0.0 — Initial Release
 - [x] Installer for macOS (zsh)
 - [x] Installer for Linux (bash)
 - [x] All config files as templates
@@ -274,7 +288,7 @@ See the [Troubleshooting Guide](docs/troubleshooting.md) for common issues.
 - [x] WSL detection and setup
 - [x] PowerShell launcher function
 
-### v1.2.0 — Customization
+### v1.2.0 — Customization (Current)
 - [x] Interactive installer (`--interactive` flag)
 - [x] Selective plugin installation (`--skip-plugins`, `--plugins=LIST`)
 - [x] Language template system (`--lang=CODE`: en, pt-BR, es)
