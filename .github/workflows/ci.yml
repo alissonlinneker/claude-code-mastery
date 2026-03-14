@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-tests:
+    name: Static Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Run installation tests
+        run: bash tests/test-install.sh
+
+      - name: Run hook tests
+        run: bash tests/test-hooks.sh
+
+  integration-ubuntu-bash:
+    name: Integration (Ubuntu/Bash)
+    runs-on: ubuntu-latest
+    needs: static-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run
+        run: |
+          docker build -t ccm-test-ubuntu-bash -f tests/docker/Dockerfile.ubuntu-bash .
+          docker run --rm ccm-test-ubuntu-bash
+
+  integration-ubuntu-zsh:
+    name: Integration (Ubuntu/Zsh)
+    runs-on: ubuntu-latest
+    needs: static-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run
+        run: |
+          docker build -t ccm-test-ubuntu-zsh -f tests/docker/Dockerfile.ubuntu-zsh .
+          docker run --rm ccm-test-ubuntu-zsh
+
+  integration-alpine:
+    name: Integration (Alpine)
+    runs-on: ubuntu-latest
+    needs: static-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run
+        run: |
+          docker build -t ccm-test-alpine -f tests/docker/Dockerfile.alpine .
+          docker run --rm ccm-test-alpine
+
+  windows-static:
+    name: Static Validation (Windows)
+    runs-on: windows-latest
+    needs: static-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate PowerShell scripts
+        shell: pwsh
+        run: |
+          $scripts = @(
+            'install.ps1',
+            'uninstall.ps1',
+            'shell/claude_code.ps1',
+            'hooks/auto-update-plugins.ps1',
+            'scripts/apply-language.ps1',
+            'scripts/apply-preset.ps1',
+            'tests/test-install.ps1'
+          )
+          $errors = 0
+          foreach ($script in $scripts) {
+            if (Test-Path $script) {
+              try {
+                $null = [System.Management.Automation.PSParser]::Tokenize(
+                  (Get-Content $script -Raw), [ref]$null
+                )
+                Write-Host "  OK: $script" -ForegroundColor Green
+              } catch {
+                Write-Host "  FAIL: $script - $_" -ForegroundColor Red
+                $errors++
+              }
+            } else {
+              Write-Host "  MISSING: $script" -ForegroundColor Yellow
+            }
+          }
+          if ($errors -gt 0) { exit 1 }
+
+      - name: Validate JSON files
+        shell: pwsh
+        run: |
+          $jsonFiles = @(
+            'configs/settings.json',
+            'configs/settings.windows.json',
+            'configs/settings.local.json',
+            'configs/i18n/en.json',
+            'configs/i18n/pt-BR.json',
+            'configs/i18n/es.json',
+            'configs/presets/general.json',
+            'configs/presets/node.json',
+            'configs/presets/python.json',
+            'configs/presets/php.json',
+            'configs/presets/monorepo.json'
+          )
+          $errors = 0
+          foreach ($file in $jsonFiles) {
+            try {
+              Get-Content $file -Raw | ConvertFrom-Json | Out-Null
+              Write-Host "  OK: $file" -ForegroundColor Green
+            } catch {
+              Write-Host "  FAIL: $file" -ForegroundColor Red
+              $errors++
+            }
+          }
+          if ($errors -gt 0) { exit 1 }
+
+      - name: Run PowerShell test suite
+        shell: pwsh
+        run: pwsh tests/test-install.ps1

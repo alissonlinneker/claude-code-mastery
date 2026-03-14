@@ -1,0 +1,15 @@
+FROM node:20-slim
+
+RUN apt-get update && apt-get install -y git python3 jq && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash testuser
+
+# Mock claude CLI — create a dummy script that succeeds
+RUN echo '#!/bin/bash\nexit 0' > /usr/local/bin/claude && chmod +x /usr/local/bin/claude
+
+COPY --chown=testuser:testuser . /home/testuser/claude-code-mastery
+
+USER testuser
+WORKDIR /home/testuser/claude-code-mastery
+
+CMD ["bash", "tests/integration/test-full-flow.sh"]
