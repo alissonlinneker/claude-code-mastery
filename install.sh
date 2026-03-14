@@ -132,6 +132,8 @@ case "$(uname -s)" in
     # Check if running in WSL
     if grep -qi microsoft /proc/version 2>/dev/null; then
       OS="Linux (WSL)"
+      info "WSL detected — using bash/Linux installer (recommended for WSL)"
+      info "For native Windows/PowerShell, use install.ps1 instead"
     fi
     SHELL_CONFIG="$HOME/.bashrc"
     # Use zshrc if zsh is the default shell

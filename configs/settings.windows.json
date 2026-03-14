@@ -1,0 +1,190 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(bun *)",
+      "Bash(node *)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(echo *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(cd *)",
+      "Bash(pwd)",
+      "Bash(which *)",
+      "Bash(curl *)",
+      "Bash(jq *)",
+      "Bash(gh *)",
+      "Bash(docker *)",
+      "Bash(python3 *)",
+      "Bash(pip *)",
+      "Bash(stat *)",
+      "Bash(sort *)",
+      "Bash(xargs *)",
+      "Bash(sed *)",
+      "Bash(awk *)",
+      "Bash(tee *)",
+      "Bash(touch *)",
+      "Bash(date *)",
+      "Bash(env *)",
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(sudo rm *)",
+      "Bash(chmod 777 *)",
+      "Bash(git push --force *)",
+      "Bash(git push --force)",
+      "Bash(git push -f *)",
+      "Bash(git push -f)",
+      "Bash(git push * --force)",
+      "Bash(git push * --force *)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -File \"$HOME/.claude/hooks/auto-update-plugins.ps1\"",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Output '--- Session Context ---'; if (Test-Path CLAUDE.md) { $s = (Get-Item CLAUDE.md).Length; Write-Output \\\"CLAUDE.md: $s bytes\\\" }; if (Test-Path .memory-bank) { $files = Get-ChildItem .memory-bank -Filter *.md -Recurse -File | Select-Object -First 50; $count = ($files | Measure-Object).Count; Write-Output \\\"Memory Bank: $count .md files\\\"; if ($count -gt 0) { $files | Select-Object -First 20 | ForEach-Object { Write-Output \\\"  - $($_.Name)\\\" }; Write-Output 'REQUIRED: Read ALL Memory Bank files (memory_bank_read) BEFORE any action. Restore full project context.' } else { Write-Output 'Memory Bank empty. Save context using memory_bank_write when tasks are completed.' } } else { Write-Output 'Memory Bank: not configured' }; Write-Output \\\"Project: $(Split-Path -Leaf (Get-Location))\\\"; if (git rev-parse --git-dir 2>$null) { Write-Output \\\"Branch: $(git branch --show-current 2>$null)\\\"; $mod = (git status --short 2>$null | Measure-Object -Line).Lines; Write-Output \\\"Modified: $mod files\\\"; Write-Output \\\"Last commit: $(git log --oneline -1 2>$null)\\\" }; Write-Output '---'\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Output '=== COMPACTED CONTEXT === REQUIRED ACTIONS BEFORE CONTINUING:'; Write-Output '1. Read project CLAUDE.md to recover mandatory rules and skills'; Write-Output '2. Read ALL .md files in .memory-bank/ using memory_bank_read'; Write-Output '3. Restore full context: in-progress tasks, decisions, modified files'; Write-Output '4. Check applicable skills (brainstorming, debugging, TDD, writing-plans, verification)'; Write-Output '5. ONLY THEN continue working where you left off'; Write-Output 'REMINDER: Skills are MANDATORY even after compact. Check the skills table in CLAUDE.md.'; if (Test-Path .memory-bank) { Write-Output '--- Memory Bank files:'; Get-ChildItem .memory-bank -Filter *.md -Recurse -File | Select-Object -First 20 | ForEach-Object { Write-Output \\\"  - $($_.Name)\\\" } }; Write-Output \\\"Project: $(Split-Path -Leaf (Get-Location))\\\"; if (git rev-parse --git-dir 2>$null) { Write-Output \\\"Branch: $(git branch --show-current 2>$null)\\\"; Write-Output \\\"Last commit: $(git log --oneline -1 2>$null)\\\"; Write-Output 'Modified files:'; git diff --name-only 2>$null | Select-Object -First 10 }; Write-Output '=== END COMPACTED CONTEXT ==='\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"$json = $input | ConvertFrom-Json; $cmd = $json.tool_input.command; if ($cmd -match '^rm -rf [/~]|sudo rm|chmod 777|git push .* (-f|--force)|git push (-f|--force)') { Write-Output '{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"deny\\\",\\\"permissionDecisionReason\\\":\\\"Dangerous command blocked. Use safer alternatives.\\\"}}' }\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Output '=== PRE-COMPACT: SAVE CONTEXT NOW ==='; Write-Output 'REQUIRED BEFORE COMPACTION:'; Write-Output '1. Save activeContext.md to Memory Bank with: current task, decisions made, modified files, next steps'; Write-Output '2. Update progress.md with what was done in this session'; Write-Output '3. Update techContext.md if there were technical discoveries'; Write-Output '4. Update systemPatterns.md if there were architectural decisions'; Write-Output 'Use memory_bank_write or memory_bank_update for each file.'; Write-Output 'Compaction should ONLY proceed AFTER saving context.'; Write-Output '=== END PRE-COMPACT ==='\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Output 'Memory Bank | Skills | Context7'\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Output 'If task completed: update Memory Bank + tasks'\""
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Output 'Update: activeContext.md + progress.md + tasks'\""
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true,
+    "shield@shield-security": true,
+    "differential-review@trailofbits": true,
+    "static-analysis@trailofbits": true,
+    "audit-context-building@trailofbits": true,
+    "supply-chain-risk-auditor@trailofbits": true,
+    "agentic-actions-auditor@trailofbits": true,
+    "sdd@context-engineering-kit": true,
+    "reflexion@context-engineering-kit": true,
+    "code-review@context-engineering-kit": true,
+    "kaizen@context-engineering-kit": true
+  },
+  "extraKnownMarketplaces": {
+    "shield-security": {
+      "source": {
+        "source": "github",
+        "repo": "alissonlinneker/shield-claude-skill"
+      }
+    },
+    "trailofbits": {
+      "source": {
+        "source": "github",
+        "repo": "trailofbits/skills"
+      }
+    },
+    "context-engineering-kit": {
+      "source": {
+        "source": "github",
+        "repo": "NeoLabHQ/context-engineering-kit"
+      }
+    }
+  }
+}

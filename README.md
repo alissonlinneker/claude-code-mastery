@@ -47,12 +47,33 @@ cd claude-code-mastery
 ./install.sh
 ```
 
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/alissonlinneker/claude-code-mastery/main/install.ps1 | iex
+```
+
+Or manually:
+
+```powershell
+git clone https://github.com/alissonlinneker/claude-code-mastery.git
+cd claude-code-mastery
+.\install.ps1
+```
+
+> **WSL users:** The bash installer (`install.sh`) auto-detects WSL and is recommended. Use `install.ps1` only for native Windows/PowerShell.
+
 ### After Installation
 
 ```bash
-# Reload your shell
+# macOS/Linux: reload your shell
 source ~/.zshrc   # or source ~/.bashrc
 
+# Windows: reload your PowerShell profile
+. $PROFILE
+```
+
+```bash
 # Navigate to any project
 cd your-project
 
@@ -155,7 +176,7 @@ Bundled with this project: architect-review, context-guardian, production-audit
 | Library docs | Guessing | Context7 auto-lookup |
 | Dangerous commands | Allowed | Blocked by PreToolUse hook |
 | Session diagnostics | None | Full project status on launch |
-| Cross-platform | CLI only | macOS + Linux installer |
+| Cross-platform | CLI only | macOS + Linux + Windows installer |
 
 ---
 
@@ -177,7 +198,7 @@ Bundled with this project: architect-review, context-guardian, production-audit
         └── MEMORY.md         # Auto-memory index template
 ```
 
-The installer also appends a `claude_code()` shell function to your `~/.zshrc` (macOS) or `~/.bashrc` (Linux) that wraps the `claude` CLI with zero-config project setup.
+The installer also appends a `claude_code()` function to your `~/.zshrc` (macOS), `~/.bashrc` (Linux), or PowerShell `$PROFILE` (Windows) that wraps the `claude` CLI with zero-config project setup.
 
 ---
 
@@ -248,9 +269,10 @@ See the [Troubleshooting Guide](docs/troubleshooting.md) for common issues.
 - [x] Uninstaller with backup restore
 
 ### v1.1.0 — Windows Support
-- [ ] PowerShell installer
-- [ ] Windows-compatible hooks
-- [ ] WSL detection and setup
+- [x] PowerShell installer (`install.ps1` / `uninstall.ps1`)
+- [x] Windows-compatible hooks (pure PowerShell, no bash dependency)
+- [x] WSL detection and setup
+- [x] PowerShell launcher function
 
 ### v1.2.0 — Customization
 - [ ] Interactive installer (`--interactive` flag)
