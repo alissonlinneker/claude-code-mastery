@@ -11,8 +11,10 @@ $Script:Pass = 0
 $Script:Fail = 0
 $Script:Total = 0
 $Script:Errors = @()
-$Script:RepoDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if (-not $Script:RepoDir) { $Script:RepoDir = (Get-Location).Path }
+$Script:RepoDir = Split-Path -Parent $PSScriptRoot
+if (-not $Script:RepoDir -or -not (Test-Path (Join-Path $Script:RepoDir "README.md"))) {
+    $Script:RepoDir = (Get-Location).Path
+}
 
 function Assert {
     param([string]$Desc, [bool]$Result)
