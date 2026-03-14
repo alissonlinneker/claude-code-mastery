@@ -38,6 +38,23 @@ foreach ($hook in $config.hooks.TaskCompleted) {
     $hook.hooks[0].command = "Write-Output '$($strings.task_completed_reminder)'"
 }
 
+# Update SessionStart (compact) hook
+foreach ($hook in $config.hooks.SessionStart) {
+    if ($hook.matcher -eq "compact") {
+        $cmd = @(
+            "Write-Output '$($strings.compacted_header)'"
+            "Write-Output '$($strings.compacted_step_1)'"
+            "Write-Output '$($strings.compacted_step_2)'"
+            "Write-Output '$($strings.compacted_step_3)'"
+            "Write-Output '$($strings.compacted_step_4)'"
+            "Write-Output '$($strings.compacted_step_5)'"
+            "Write-Output '$($strings.compacted_reminder)'"
+            "Write-Output '$($strings.compacted_footer)'"
+        ) -join "; "
+        $hook.hooks[0].command = $cmd
+    }
+}
+
 # Update PreCompact
 foreach ($hook in $config.hooks.PreCompact) {
     $cmd = @(

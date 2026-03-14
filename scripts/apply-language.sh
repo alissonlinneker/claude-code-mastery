@@ -28,13 +28,14 @@ fi
 cp "$SETTINGS" "${SETTINGS}.bak"
 
 # Use python3 to rebuild settings.json with translated hook strings
-python3 << 'PYEOF'
-import json, sys, os
+export REPO_DIR LANG_CODE SETTINGS
+python3 << PYEOF
+import json, os
 
-lang_code = sys.argv[1] if len(sys.argv) > 1 else "en"
+lang_code = os.environ.get("LANG_CODE", "en")
 repo_dir = os.environ.get("REPO_DIR", ".")
 lang_file = os.path.join(repo_dir, "configs", "i18n", f"{lang_code}.json")
-settings_file = os.path.join(os.path.expanduser("~"), ".claude", "settings.json")
+settings_file = os.environ.get("SETTINGS", os.path.join(os.path.expanduser("~"), ".claude", "settings.json"))
 
 with open(lang_file) as f:
     strings = json.load(f)

@@ -11,7 +11,12 @@
 [CmdletBinding()]
 param(
     [switch]$Force,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Interactive,
+    [string]$Lang = "en",
+    [string]$Preset = "general",
+    [switch]$SkipPlugins,
+    [string]$Plugins = ""
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,7 +27,7 @@ $RepoDir = $PSScriptRoot
 $ClaudeDir = Join-Path $HOME '.claude'
 $GuardStart = '# >>> claude-code-mastery >>>'
 $GuardEnd = '# <<< claude-code-mastery <<<'
-$Version = '1.1.0'
+$Version = '1.2.0'
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -139,6 +144,49 @@ if ($Missing.Count -gt 0) {
 
 Write-Success "All prerequisites found"
 
+# ── Step 2b: Interactive mode ─────────────────────────────────────────────────
+
+if ($Interactive -and -not $Force -and -not $DryRun) {
+    Write-Host ""
+    Write-Info "Interactive setup — press Enter to accept defaults"
+    Write-Host ""
+
+    $reply = Read-Host "  Hook language (en, pt-BR, es) [$Lang]"
+    if ($reply) { $Lang = $reply }
+
+    $reply = Read-Host "  Project preset (general, node, python, php, monorepo) [$Preset]"
+    if ($reply) { $Preset = $reply }
+
+    Write-Host ""
+    Write-Host "  Plugin marketplaces:"
+    Write-Host "    1. superpowers (workflow skills)"
+    Write-Host "    2. trailofbits (security analysis)"
+    Write-Host "    3. context-engineering-kit (quality engineering)"
+    Write-Host "    4. shield (security orchestrator)"
+    Write-Host ""
+    $reply = Read-Host "  Install all plugins? [Y/n]"
+    if ($reply -and $reply -notmatch '^[Yy]') {
+        $SkipPlugins = $true
+    }
+
+    Write-Host ""
+    Write-Info "Configuration: lang=$Lang, preset=$Preset"
+}
+
+# Validate language file
+$LangFile = Join-Path $RepoDir "configs\i18n\$Lang.json"
+if (-not (Test-Path $LangFile)) {
+    Write-Warn "Language '$Lang' not found, falling back to 'en'"
+    $Lang = "en"
+}
+
+# Validate preset file
+$PresetFile = Join-Path $RepoDir "configs\presets\$Preset.json"
+if (-not (Test-Path $PresetFile)) {
+    Write-Warn "Preset '$Preset' not found, falling back to 'general'"
+    $Preset = "general"
+}
+
 # ── Step 3: Confirm ─────────────────────────────────────────────────────────
 
 if (-not $Force -and -not $DryRun) {
@@ -235,14 +283,25 @@ Install-ConfigFile `
 
 # ── Step 9: Install plugin marketplaces ─────────────────────────────────────
 
+if ($SkipPlugins) {
+    Write-Info "Skipping plugin installation (-SkipPlugins)"
+} else {
+
 Write-Info "Installing plugin marketplaces..."
 
-$Marketplaces = @(
+$AllMarketplaces = @(
     'obra/superpowers-marketplace',
     'trailofbits/skills',
     'NeoLabHQ/context-engineering-kit',
     'alissonlinneker/shield-claude-skill'
 )
+
+if ($Plugins) {
+    $SelectedList = $Plugins -split ','
+    $Marketplaces = $AllMarketplaces | Where-Object { $mp = $_; $SelectedList | Where-Object { $mp -match $_ } }
+} else {
+    $Marketplaces = $AllMarketplaces
+}
 
 foreach ($marketplace in $Marketplaces) {
     if (Test-DryRun "claude plugin marketplace add $marketplace") { continue }
@@ -292,6 +351,8 @@ foreach ($plugin in $Plugins) {
         Write-Warn "Could not install plugin: $plugin (you can install it manually later)"
     }
 }
+
+} # End of SkipPlugins check
 
 # ── Step 11: Add PowerShell function ────────────────────────────────────────
 
@@ -368,6 +429,36 @@ if (Test-Path $GlobalMcpJson -PathType Leaf) {
             Write-Success "Removed global ~/.mcp.json (backup saved)"
         } else {
             Write-Info "Keeping global ~/.mcp.json (may conflict with per-project config)"
+        }
+    }
+}
+
+# ── Step 13: Apply language ────────────────────────────────────────────────────
+
+if ($Lang -ne "en") {
+    Write-Info "Applying hook language: $Lang"
+    $applyLangScript = Join-Path $RepoDir "scripts\apply-language.ps1"
+    if ((Test-Path $applyLangScript) -and -not $DryRun) {
+        try {
+            & $applyLangScript -Lang $Lang
+            Write-Success "Hook language: $Lang"
+        } catch {
+            Write-Warn "Could not apply language $Lang (run scripts\apply-language.ps1 later)"
+        }
+    }
+}
+
+# ── Step 14: Apply preset ─────────────────────────────────────────────────────
+
+if ($Preset -ne "general") {
+    Write-Info "Applying project preset: $Preset"
+    $applyPresetScript = Join-Path $RepoDir "scripts\apply-preset.ps1"
+    if ((Test-Path $applyPresetScript) -and -not $DryRun) {
+        try {
+            & $applyPresetScript -Preset $Preset
+            Write-Success "Preset: $Preset"
+        } catch {
+            Write-Warn "Could not apply preset $Preset (run scripts\apply-preset.ps1 later)"
         }
     }
 }

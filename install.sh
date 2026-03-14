@@ -17,7 +17,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_DIR="$HOME/.claude"
 GUARD_START="# >>> claude-code-mastery >>>"
 GUARD_END="# <<< claude-code-mastery <<<"
-VERSION="1.0.0"
+VERSION="1.2.0"
 
 # ── Colors ─────────────────────────────────────────────────────────────────────
 

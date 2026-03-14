@@ -275,10 +275,10 @@ See the [Troubleshooting Guide](docs/troubleshooting.md) for common issues.
 - [x] PowerShell launcher function
 
 ### v1.2.0 — Customization
-- [ ] Interactive installer (`--interactive` flag)
-- [ ] Selective plugin installation
-- [ ] Language template system
-- [ ] Project-type presets (Node.js, Python, PHP, monorepo)
+- [x] Interactive installer (`--interactive` flag)
+- [x] Selective plugin installation (`--skip-plugins`, `--plugins=LIST`)
+- [x] Language template system (`--lang=CODE`: en, pt-BR, es)
+- [x] Project-type presets (`--preset=NAME`: general, node, python, php, monorepo)
 
 ### v2.0.0 — Advanced
 - [ ] Web dashboard for memory visualization

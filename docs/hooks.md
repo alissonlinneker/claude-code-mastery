@@ -333,7 +333,7 @@ This ensures that:
 |----------|-------|
 | **Event** | `PreToolUse` |
 | **Matcher** | `Bash` |
-| **Timeout** | Default (no explicit override) |
+| **Timeout** | 5 seconds |
 | **Purpose** | Block dangerous shell commands before execution |
 
 This is the only hook that uses structured JSON output to make permission decisions. It intercepts every `Bash` tool invocation and inspects the command before it runs. If a dangerous pattern is detected, it returns a JSON deny decision that prevents execution.
