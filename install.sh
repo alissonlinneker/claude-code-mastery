@@ -32,6 +32,11 @@ NC='\033[0m' # No Color
 
 FORCE=false
 DRY_RUN=false
+INTERACTIVE=false
+LANG_CODE="en"
+PRESET="general"
+SKIP_PLUGINS=false
+SELECTED_PLUGINS=""
 
 # Auto-enable force mode when stdin is not a terminal (e.g., curl | bash)
 if [ ! -t 0 ]; then
@@ -42,15 +47,25 @@ for arg in "$@"; do
   case "$arg" in
     --force) FORCE=true ;;
     --dry-run) DRY_RUN=true ;;
+    --interactive) INTERACTIVE=true ;;
+    --skip-plugins) SKIP_PLUGINS=true ;;
+    --lang=*) LANG_CODE="${arg#--lang=}" ;;
+    --preset=*) PRESET="${arg#--preset=}" ;;
+    --plugins=*) SELECTED_PLUGINS="${arg#--plugins=}" ;;
     --help|-h)
       echo "Claude Code Mastery Installer v$VERSION"
       echo ""
       echo "Usage: ./install.sh [OPTIONS]"
       echo ""
       echo "Options:"
-      echo "  --force     Skip confirmations"
-      echo "  --dry-run   Preview actions without making changes"
-      echo "  --help      Show this help message"
+      echo "  --force          Skip confirmations"
+      echo "  --dry-run        Preview actions without making changes"
+      echo "  --interactive    Guided setup with prompts"
+      echo "  --lang=CODE      Set hook language (en, pt-BR, es). Default: en"
+      echo "  --preset=NAME    Apply project preset (general, node, python, php, monorepo)"
+      echo "  --skip-plugins   Skip marketplace and plugin installation"
+      echo "  --plugins=LIST   Install only listed marketplaces (comma-separated)"
+      echo "  --help           Show this help message"
       exit 0
       ;;
   esac
@@ -179,6 +194,55 @@ fi
 
 success "All prerequisites found"
 
+# ── Step 2b: Interactive mode ─────────────────────────────────────────────────
+
+if [ "$INTERACTIVE" = true ] && [ "$FORCE" = false ] && [ "$DRY_RUN" = false ]; then
+  echo ""
+  info "Interactive setup — press Enter to accept defaults"
+  echo ""
+
+  # Language selection
+  echo "  Available languages: en (English), pt-BR (Portuguese), es (Spanish)"
+  read -rp "  Hook language [$LANG_CODE]: " REPLY
+  [ -n "$REPLY" ] && LANG_CODE="$REPLY"
+
+  # Preset selection
+  echo ""
+  echo "  Available presets: general, node, python, php, monorepo"
+  read -rp "  Project preset [$PRESET]: " REPLY
+  [ -n "$REPLY" ] && PRESET="$REPLY"
+
+  # Plugin selection
+  echo ""
+  echo "  Plugin marketplaces:"
+  echo "    1. superpowers (workflow skills)"
+  echo "    2. trailofbits (security analysis)"
+  echo "    3. context-engineering-kit (quality engineering)"
+  echo "    4. shield (security orchestrator)"
+  echo ""
+  read -rp "  Install all plugins? [Y/n]: " REPLY
+  REPLY=${REPLY:-Y}
+  if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+    read -rp "  Which marketplaces? (comma-separated numbers, e.g., 1,2): " REPLY
+    MARKETPLACE_SELECTION="$REPLY"
+  fi
+
+  echo ""
+  info "Configuration: lang=$LANG_CODE, preset=$PRESET"
+fi
+
+# Validate language file exists
+if [ ! -f "$REPO_DIR/configs/i18n/${LANG_CODE}.json" ]; then
+  warn "Language '$LANG_CODE' not found, falling back to 'en'"
+  LANG_CODE="en"
+fi
+
+# Validate preset file exists
+if [ ! -f "$REPO_DIR/configs/presets/${PRESET}.json" ]; then
+  warn "Preset '$PRESET' not found, falling back to 'general'"
+  PRESET="general"
+fi
+
 # ── Step 3: Confirm ───────────────────────────────────────────────────────────
 
 if [ "$FORCE" = false ] && [ "$DRY_RUN" = false ]; then
@@ -246,53 +310,74 @@ install_file "$REPO_DIR/configs/MEMORY.md" "$DEFAULT_MEMORY_DIR/MEMORY.md" "MEMO
 
 # ── Step 9: Install plugin marketplaces ───────────────────────────────────────
 
-info "Installing plugin marketplaces..."
+if [ "$SKIP_PLUGINS" = true ]; then
+  info "Skipping plugin installation (--skip-plugins)"
+else
+  info "Installing plugin marketplaces..."
 
-MARKETPLACES=(
-  "obra/superpowers-marketplace"
-  "trailofbits/skills"
-  "NeoLabHQ/context-engineering-kit"
-  "alissonlinneker/shield-claude-skill"
-)
+  ALL_MARKETPLACES=(
+    "obra/superpowers-marketplace"
+    "trailofbits/skills"
+    "NeoLabHQ/context-engineering-kit"
+    "alissonlinneker/shield-claude-skill"
+  )
 
-for marketplace in "${MARKETPLACES[@]}"; do
-  if do_or_dry "claude plugin marketplace add $marketplace"; then continue; fi
-
-  info "Adding marketplace: $marketplace"
-  if claude plugin marketplace add "$marketplace" 2>/dev/null; then
-    success "Marketplace: $marketplace"
+  # Filter marketplaces if --plugins was specified
+  if [ -n "$SELECTED_PLUGINS" ]; then
+    MARKETPLACES=()
+    IFS=',' read -ra SELECTED <<< "$SELECTED_PLUGINS"
+    for sel in "${SELECTED[@]}"; do
+      sel=$(echo "$sel" | tr -d ' ')
+      for mp in "${ALL_MARKETPLACES[@]}"; do
+        if echo "$mp" | grep -qi "$sel"; then
+          MARKETPLACES+=("$mp")
+        fi
+      done
+    done
+    info "Installing selected marketplaces: ${MARKETPLACES[*]}"
   else
-    warn "Could not add marketplace: $marketplace (you can add it manually later)"
+    MARKETPLACES=("${ALL_MARKETPLACES[@]}")
   fi
-done
 
-# ── Step 10: Install plugins ──────────────────────────────────────────────────
+  for marketplace in "${MARKETPLACES[@]}"; do
+    if do_or_dry "claude plugin marketplace add $marketplace"; then continue; fi
 
-info "Installing plugins from marketplaces..."
+    info "Adding marketplace: $marketplace"
+    if claude plugin marketplace add "$marketplace" 2>/dev/null; then
+      success "Marketplace: $marketplace"
+    else
+      warn "Could not add marketplace: $marketplace (you can add it manually later)"
+    fi
+  done
 
-PLUGINS=(
-  "superpowers@superpowers-marketplace"
-  "shield@shield-security"
-  "differential-review@trailofbits"
-  "static-analysis@trailofbits"
-  "audit-context-building@trailofbits"
-  "supply-chain-risk-auditor@trailofbits"
-  "agentic-actions-auditor@trailofbits"
-  "sdd@context-engineering-kit"
-  "reflexion@context-engineering-kit"
-  "code-review@context-engineering-kit"
-  "kaizen@context-engineering-kit"
-)
+  # ── Step 10: Install plugins ──────────────────────────────────────────────────
 
-for plugin in "${PLUGINS[@]}"; do
-  if do_or_dry "claude plugin install $plugin"; then continue; fi
+  info "Installing plugins from marketplaces..."
 
-  if claude plugin install "$plugin" 2>/dev/null; then
-    success "Plugin: $plugin"
-  else
-    warn "Could not install plugin: $plugin (you can install it manually later)"
-  fi
-done
+  PLUGINS=(
+    "superpowers@superpowers-marketplace"
+    "shield@shield-security"
+    "differential-review@trailofbits"
+    "static-analysis@trailofbits"
+    "audit-context-building@trailofbits"
+    "supply-chain-risk-auditor@trailofbits"
+    "agentic-actions-auditor@trailofbits"
+    "sdd@context-engineering-kit"
+    "reflexion@context-engineering-kit"
+    "code-review@context-engineering-kit"
+    "kaizen@context-engineering-kit"
+  )
+
+  for plugin in "${PLUGINS[@]}"; do
+    if do_or_dry "claude plugin install $plugin"; then continue; fi
+
+    if claude plugin install "$plugin" 2>/dev/null; then
+      success "Plugin: $plugin"
+    else
+      warn "Could not install plugin: $plugin (you can install it manually later)"
+    fi
+  done
+fi
 
 # ── Step 11: Add shell function ───────────────────────────────────────────────
 
@@ -349,6 +434,28 @@ if [ -f "$HOME/.mcp.json" ]; then
   fi
 fi
 
+# ── Step 13: Apply language ────────────────────────────────────────────────────
+
+if [ "$LANG_CODE" != "en" ]; then
+  info "Applying hook language: $LANG_CODE"
+  if [ -f "$REPO_DIR/scripts/apply-language.sh" ] && ! do_or_dry "apply language $LANG_CODE"; then
+    bash "$REPO_DIR/scripts/apply-language.sh" "$LANG_CODE" 2>/dev/null && \
+      success "Hook language: $LANG_CODE" || \
+      warn "Could not apply language $LANG_CODE (you can run scripts/apply-language.sh later)"
+  fi
+fi
+
+# ── Step 14: Apply preset ─────────────────────────────────────────────────────
+
+if [ "$PRESET" != "general" ]; then
+  info "Applying project preset: $PRESET"
+  if [ -f "$REPO_DIR/scripts/apply-preset.sh" ] && ! do_or_dry "apply preset $PRESET"; then
+    bash "$REPO_DIR/scripts/apply-preset.sh" "$PRESET" 2>/dev/null && \
+      success "Preset: $PRESET" || \
+      warn "Could not apply preset $PRESET (you can run scripts/apply-preset.sh later)"
+  fi
+fi
+
 # ── Summary ────────────────────────────────────────────────────────────────────
 
 echo ""
@@ -364,6 +471,12 @@ echo -e "    ${GREEN}✓${NC} Custom skills (3) → ~/.claude/skills/"
 echo -e "    ${GREEN}✓${NC} Auto-update hook  → ~/.claude/hooks/"
 echo -e "    ${GREEN}✓${NC} Memory template   → ~/.claude/projects/"
 echo -e "    ${GREEN}✓${NC} Shell launcher    → $SHELL_CONFIG"
+if [ "$LANG_CODE" != "en" ]; then
+  echo -e "    ${GREEN}✓${NC} Hook language     → $LANG_CODE"
+fi
+if [ "$PRESET" != "general" ]; then
+  echo -e "    ${GREEN}✓${NC} Project preset    → $PRESET"
+fi
 echo ""
 echo "  Next steps:"
 echo "    1. Reload your shell:  source $SHELL_CONFIG"

@@ -1,0 +1,20 @@
+{
+  "name": "node",
+  "description": "Node.js/TypeScript projects with package managers and test runners",
+  "permissions": {
+    "allow": [
+      "Bash(yarn *)",
+      "Bash(pnpm *)",
+      "Bash(tsx *)",
+      "Bash(ts-node *)",
+      "Bash(jest *)",
+      "Bash(vitest *)",
+      "Bash(playwright *)",
+      "Bash(eslint *)",
+      "Bash(prettier *)",
+      "Bash(next *)",
+      "Bash(vite *)",
+      "Bash(turbo *)"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "general",
+  "description": "General-purpose development (default permissions)",
+  "permissions": {
+    "allow": []
+  }
+}

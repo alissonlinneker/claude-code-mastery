@@ -1,0 +1,21 @@
+{
+  "name": "python",
+  "description": "Python projects with virtual environments and package managers",
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(poetry *)",
+      "Bash(pipenv *)",
+      "Bash(uv *)",
+      "Bash(pytest *)",
+      "Bash(mypy *)",
+      "Bash(ruff *)",
+      "Bash(black *)",
+      "Bash(flask *)",
+      "Bash(uvicorn *)",
+      "Bash(gunicorn *)",
+      "Bash(django-admin *)",
+      "Bash(manage.py *)"
+    ]
+  }
+}

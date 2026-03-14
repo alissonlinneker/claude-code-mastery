@@ -1,0 +1,16 @@
+{
+  "name": "monorepo",
+  "description": "Monorepo workspaces with orchestration tools",
+  "permissions": {
+    "allow": [
+      "Bash(turbo *)",
+      "Bash(nx *)",
+      "Bash(lerna *)",
+      "Bash(pnpm *)",
+      "Bash(yarn *)",
+      "Bash(rush *)",
+      "Bash(bazel *)",
+      "Bash(make *)"
+    ]
+  }
+}
