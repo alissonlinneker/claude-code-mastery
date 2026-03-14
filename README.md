@@ -1,8 +1,21 @@
-# Claude Code Mastery
+<p align="center">
+  <img src="docs/logo.svg" alt="Claude Code Mastery" width="400">
+</p>
 
-> Persistent memory, smart hooks, and curated skills for Claude Code CLI — never lose context again.
+<p align="center">
+  <strong>Persistent memory, smart hooks, and curated skills for Claude Code CLI.</strong><br>
+  Never lose context again.
+</p>
 
-A production-ready configuration system for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) that transforms it from a stateless assistant into a persistent, context-aware development partner.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://github.com/alissonlinneker/claude-code-mastery/releases"><img src="https://img.shields.io/badge/version-1.2.0-green.svg" alt="Version 1.2.0"></a>
+  <a href="reports/security-2026-03-14.md"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Falissonlinneker%2Fclaude-code-mastery%2Fmain%2Fshield-badge.json&query=%24.message&label=Shield%20Score&color=brightgreen" alt="Shield Score"></a>
+  <a href="https://github.com/alissonlinneker/claude-code-mastery/actions"><img src="https://github.com/alissonlinneker/claude-code-mastery/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/alissonlinneker/claude-code-mastery/stargazers"><img src="https://img.shields.io/github/stars/alissonlinneker/claude-code-mastery?style=social" alt="GitHub Stars"></a>
+</p>
+
+<p align="center"><em>A production-ready configuration system for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code CLI</a> that transforms it from a stateless assistant into a persistent, context-aware development partner.</em></p>
 
 ---
 

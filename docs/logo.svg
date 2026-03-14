@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 140" fill="none">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d97706;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Brain/Memory icon -->
+  <g transform="translate(5, 10)">
+    <circle cx="60" cy="60" r="56" fill="url(#grad1)" opacity="0.12"/>
+    <circle cx="60" cy="60" r="56" stroke="url(#grad1)" stroke-width="2.5" fill="none"/>
+    <path d="M60 28 C45 28 35 38 35 48 C35 52 37 56 40 58 C37 60 34 65 34 70 C34 80 42 88 52 88 L55 88 L55 60 L65 60 L65 88 L68 88 C78 88 86 80 86 70 C86 65 83 60 80 58 C83 56 85 52 85 48 C85 38 75 28 60 28Z" fill="url(#grad1)" opacity="0.85"/>
+    <circle cx="48" cy="50" r="3" fill="white" opacity="0.9"/>
+    <circle cx="72" cy="50" r="3" fill="white" opacity="0.9"/>
+    <circle cx="48" cy="70" r="3" fill="white" opacity="0.9"/>
+    <circle cx="72" cy="70" r="3" fill="white" opacity="0.9"/>
+    <line x1="48" y1="53" x2="48" y2="67" stroke="white" stroke-width="1.5" opacity="0.6"/>
+    <line x1="72" y1="53" x2="72" y2="67" stroke="white" stroke-width="1.5" opacity="0.6"/>
+    <line x1="51" y1="50" x2="69" y2="50" stroke="white" stroke-width="1.5" opacity="0.6"/>
+    <line x1="51" y1="70" x2="69" y2="70" stroke="white" stroke-width="1.5" opacity="0.6"/>
+  </g>
+
+  <!-- Text -->
+  <text x="135" y="65" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="42" font-weight="700" fill="#1c1917">Claude Code</text>
+  <text x="135" y="105" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="42" font-weight="300" fill="url(#grad2)">Mastery</text>
+</svg>
