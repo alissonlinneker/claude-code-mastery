@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="https://github.com/alissonlinneker/claude-code-mastery/releases"><img src="https://img.shields.io/badge/version-1.2.1-green.svg" alt="Version 1.2.0"></a>
+  <a href="https://github.com/alissonlinneker/claude-code-mastery/releases"><img src="https://img.shields.io/badge/version-1.2.2-green.svg" alt="Version 1.2.0"></a>
   <a href="reports/security-2026-03-14.md"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Falissonlinneker%2Fclaude-code-mastery%2Fmain%2Fshield-badge.json&query=%24.message&label=Shield%20Score&color=brightgreen" alt="Shield Score"></a>
   <a href="https://github.com/alissonlinneker/claude-code-mastery/actions"><img src="https://github.com/alissonlinneker/claude-code-mastery/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/alissonlinneker/claude-code-mastery/stargazers"><img src="https://img.shields.io/github/stars/alissonlinneker/claude-code-mastery?style=social" alt="GitHub Stars"></a>
@@ -151,7 +151,7 @@ Claude is instructed to **read all files at session start** and **write updates 
 | `SessionStart` (default) | Every session | Shows diagnostics, instructs Memory Bank read |
 | `SessionStart` (compact) | After compaction | Full context restoration from Memory Bank |
 | `UserPromptSubmit` | Every user message | Reminds: Memory Bank, Skills, Context7 |
-| `PreCompact` | Before compaction | Saves all context to Memory Bank |
+| `PreCompact` | Before compaction | Auto-saves git state snapshot + instructs full context save |
 | `Stop` | After each response | Reminds to update Memory Bank on task completion |
 | `TaskCompleted` | Task done | Updates Memory Bank and task tracker |
 | `PreToolUse` (Bash) | Before bash commands | Blocks dangerous commands (rm -rf, force push, etc.) |

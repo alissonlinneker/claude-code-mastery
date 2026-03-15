@@ -17,7 +17,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_DIR="$HOME/.claude"
 GUARD_START="# >>> claude-code-mastery >>>"
 GUARD_END="# <<< claude-code-mastery <<<"
-VERSION="1.2.1"
+VERSION="1.2.2"
 
 # ── Colors ─────────────────────────────────────────────────────────────────────
 
@@ -291,9 +291,11 @@ install_file "$REPO_DIR/skills/production-audit.md" "$CLAUDE_DIR/skills/producti
 info "Installing hooks..."
 
 install_file "$REPO_DIR/hooks/auto-update-plugins.sh" "$CLAUDE_DIR/hooks/auto-update-plugins.sh" "hook: auto-update-plugins"
+install_file "$REPO_DIR/hooks/pre-compact-save.sh" "$CLAUDE_DIR/hooks/pre-compact-save.sh" "hook: pre-compact-save"
 
-if ! do_or_dry "chmod +x auto-update-plugins.sh"; then
+if ! do_or_dry "chmod +x hooks"; then
   chmod +x "$CLAUDE_DIR/hooks/auto-update-plugins.sh"
+  chmod +x "$CLAUDE_DIR/hooks/pre-compact-save.sh"
 fi
 
 # ── Step 8: Install MEMORY.md template ────────────────────────────────────────

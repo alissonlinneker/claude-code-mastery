@@ -36,6 +36,14 @@
 | Project scope defined | `projectbrief.md` |
 | Business rules mapped | `productContext.md` |
 
+### Memory Scopes
+
+The 6 files serve two distinct scopes:
+- **Session-scoped** (high turnover): `activeContext.md`, `progress.md` — overwritten frequently, recency matters
+- **Project-scoped** (stable): `projectbrief.md`, `productContext.md`, `techContext.md`, `systemPatterns.md` — append-mostly, structural knowledge
+
+The `PreCompact` hook auto-saves a git state snapshot to `activeContext.md` before compaction, ensuring session state is never lost even if compaction fires mid-task.
+
 ### Protection
 
 - **NEVER overwrite** without reading first. Use `memory_bank_update` to preserve content.

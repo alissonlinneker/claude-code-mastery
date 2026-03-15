@@ -114,8 +114,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -Command \"Write-Output '=== PRE-COMPACT: SAVE CONTEXT NOW ==='; Write-Output 'REQUIRED BEFORE COMPACTION:'; Write-Output '1. Save activeContext.md to Memory Bank with: current task, decisions made, modified files, next steps'; Write-Output '2. Update progress.md with what was done in this session'; Write-Output '3. Update techContext.md if there were technical discoveries'; Write-Output '4. Update systemPatterns.md if there were architectural decisions'; Write-Output 'Use memory_bank_write or memory_bank_update for each file.'; Write-Output 'Compaction should ONLY proceed AFTER saving context.'; Write-Output '=== END PRE-COMPACT ==='\"",
-            "timeout": 5
+            "command": "pwsh -File \"$HOME/.claude/hooks/pre-compact-save.ps1\"",
+            "timeout": 10
           }
         ]
       }

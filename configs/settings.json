@@ -114,8 +114,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '=== PRE-COMPACT: SAVE CONTEXT NOW ===' && echo 'REQUIRED BEFORE COMPACTION:' && echo '1. Save activeContext.md to Memory Bank with: current task, decisions made, modified files, next steps' && echo '2. Update progress.md with what was done in this session' && echo '3. Update techContext.md if there were technical discoveries' && echo '4. Update systemPatterns.md if there were architectural decisions' && echo 'Use memory_bank_write or memory_bank_update for each file.' && echo 'Compaction should ONLY proceed AFTER saving context.' && echo '=== END PRE-COMPACT ==='",
-            "timeout": 5
+            "command": "$HOME/.claude/hooks/pre-compact-save.sh",
+            "timeout": 10
           }
         ]
       }

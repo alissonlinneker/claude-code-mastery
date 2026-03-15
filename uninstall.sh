@@ -145,6 +145,11 @@ if [ -f "$CLAUDE_DIR/hooks/auto-update-plugins.sh" ]; then
   success "Removed hook: auto-update-plugins.sh"
 fi
 
+if [ -f "$CLAUDE_DIR/hooks/pre-compact-save.sh" ]; then
+  rm "$CLAUDE_DIR/hooks/pre-compact-save.sh"
+  success "Removed hook: pre-compact-save.sh"
+fi
+
 # Remove hooks directory if empty
 if [ -d "$CLAUDE_DIR/hooks" ] && [ -z "$(ls -A "$CLAUDE_DIR/hooks" 2>/dev/null)" ]; then
   rmdir "$CLAUDE_DIR/hooks"

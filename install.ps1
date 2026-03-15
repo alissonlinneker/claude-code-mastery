@@ -27,7 +27,7 @@ $RepoDir = $PSScriptRoot
 $ClaudeDir = Join-Path $HOME '.claude'
 $GuardStart = '# >>> claude-code-mastery >>>'
 $GuardEnd = '# <<< claude-code-mastery <<<'
-$Version = '1.2.1'
+$Version = '1.2.2'
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -265,6 +265,11 @@ Install-ConfigFile `
     -Source (Join-Path $RepoDir 'hooks\auto-update-plugins.ps1') `
     -Destination (Join-Path $ClaudeDir 'hooks\auto-update-plugins.ps1') `
     -Description 'hook: auto-update-plugins'
+
+Install-ConfigFile `
+    -Source (Join-Path $RepoDir 'hooks\pre-compact-save.ps1') `
+    -Destination (Join-Path $ClaudeDir 'hooks\pre-compact-save.ps1') `
+    -Description 'hook: pre-compact-save'
 
 # ── Step 8: Install MEMORY.md template ──────────────────────────────────────
 
