@@ -37,9 +37,9 @@ Claude Code CLI supports hooks — shell commands that fire automatically at spe
 | `hooks[].command` | `string` | The shell command or script to run. |
 | `hooks[].timeout` | `number` | Maximum seconds to wait before killing the hook. Optional — defaults vary by event. |
 
-Hook commands run in the project's working directory. Their `stdout` output is passed back to Claude as context. For `PreToolUse` hooks, the output can include a JSON decision object to allow or deny tool execution.
+Hook commands run in the project's working directory. Plain-text `stdout` is added to Claude's context for events such as `SessionStart` and `UserPromptSubmit`, but **not** for most events. For `PreToolUse`, valid structured JSON can request an `allow`, `deny`, or `ask` decision; a silent successful exit does not automatically authorize the tool call. See the [official hooks reference](https://code.claude.com/docs/en/hooks#exit-code-0).
 
-**Key principle:** Hooks are non-interactive. They cannot prompt for user input. They must exit cleanly (exit code 0) or the hook is treated as failed.
+**Key principle:** Command hooks run non-interactively. For `PreToolUse`, exit code `2` intentionally blocks the tool call, while exit `0` without a decision leaves the normal permission flow intact. Other nonzero exit codes are generally non-blocking errors unless the event or `onFailure` setting specifies otherwise.
 
 ---
 
@@ -348,7 +348,7 @@ This is the only hook that uses structured JSON output to make permission decisi
    - `chmod 777` (overly permissive file permissions)
    - `git push -f` or `git push --force` (force push)
 4. If a match is found, outputs a JSON deny decision.
-5. If no match, outputs nothing (implicit allow).
+5. If no match, outputs nothing (no hook decision; normal tool permission checks still apply).
 
 **Command:**
 
